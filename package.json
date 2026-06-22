@@ -71,5 +71,10 @@
     "overrides": {
       "rollup": ">=4.59.0"
     }
+  },
+  "dependencies": {
+    "@assistant-ui/react": "^0.14.23",
+    "@assistant-ui/store": "^0.2.18",
+    "@assistant-ui/tap": "^0.9.2"
   }
 }

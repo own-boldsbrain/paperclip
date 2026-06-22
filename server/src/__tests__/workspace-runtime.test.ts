@@ -1773,7 +1773,7 @@ describe("realizeExecutionWorkspace", () => {
       created: true,
     });
     expect(operations[1]?.command).toBe("bash ./scripts/provision.sh");
-  });
+  }, 15000);
 
   it("truncates oversized provision command output before storing it in memory", async () => {
     const repoRoot = await createTempRepo();

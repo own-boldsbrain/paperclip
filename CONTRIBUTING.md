@@ -64,7 +64,7 @@ Either way, a reviewer should be able to understand the underlying issue without
 
 ### No Internal Issue References
 
-Many contributors run their own Paperclip instance to manage their work. Issue ids and links from *your* instance are private — reviewers and other contributors cannot open them, so they show up as clutter or broken links.
+Many contributors run their own Paperclip instance to manage their work. Issue ids and links from _your_ instance are private — reviewers and other contributors cannot open them, so they show up as clutter or broken links.
 
 In your PR title, description, commits, and comments, **only reference public GitHub issues and PRs** — `#123`, `Fixes #123` / `Closes #123` / `Refs #123`, or full `https://github.com/paperclipai/paperclip/...` URLs.
 
@@ -155,7 +155,7 @@ Bugs, docs improvements, and small targeted improvements are still the easiest p
 
 Your PR description must follow the [PR template](.github/PULL_REQUEST_TEMPLATE.md). All sections are required. The "thinking path" at the top explains from the top of the project down to what you fixed. E.g.:
 
-### Thinking Path Example 1:
+### Thinking Path Example 1
 
 > - Paperclip is the open source app people use to manage AI agents for work
 > - There are many types of adapters for each LLM model provider
@@ -164,7 +164,7 @@ Your PR description must follow the [PR template](.github/PULL_REQUEST_TEMPLATE.
 > - This pull request adds per-adapter configuration of compaction, either auto or paperclip managed
 > - That way we can get optimal performance from any adapter/provider in Paperclip
 
-### Thinking Path Example 2:
+### Thinking Path Example 2
 
 > - Paperclip is the open source app people use to manage AI agents for work
 > - But humans want to watch the agents and oversee their work

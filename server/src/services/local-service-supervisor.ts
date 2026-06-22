@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -354,7 +354,13 @@ export async function terminateLocalService(
   const signal = opts?.signal ?? "SIGTERM";
   const targetProcessGroup = process.platform !== "win32" && record.processGroupId && record.processGroupId > 0;
   try {
-    if (targetProcessGroup) {
+    if (process.platform === "win32") {
+      try {
+        execSync(`C:\\Windows\\System32\\taskkill.exe /pid ${record.pid} /t /f`, { stdio: "ignore" });
+      } catch {
+        process.kill(record.pid, signal);
+      }
+    } else if (targetProcessGroup) {
       process.kill(-record.processGroupId!, signal);
     } else {
       process.kill(record.pid, signal);
@@ -379,7 +385,13 @@ export async function terminateLocalService(
     : isPidAlive(record.pid);
   if (!stillAlive) return;
   try {
-    if (targetProcessGroup) {
+    if (process.platform === "win32") {
+      try {
+        execSync(`taskkill.exe /pid ${record.pid} /t /f`, { stdio: "ignore" });
+      } catch {
+        process.kill(record.pid, "SIGKILL");
+      }
+    } else if (targetProcessGroup) {
       process.kill(-record.processGroupId!, "SIGKILL");
     } else {
       process.kill(record.pid, "SIGKILL");
@@ -390,8 +402,19 @@ export async function terminateLocalService(
 }
 
 export async function readLocalServicePortOwner(port: number) {
-  if (!Number.isInteger(port) || port <= 0 || process.platform === "win32") return null;
+  if (!Number.isInteger(port) || port <= 0) return null;
   try {
+    if (process.platform === "win32") {
+      const { stdout } = await execFileAsync("netstat", ["-ano", "-p", "TCP"]);
+      for (const line of stdout.split("\n")) {
+        if (line.includes(`:${port}`) && line.includes("LISTEN")) {
+          const parts = line.trim().split(/\s+/);
+          const pid = Number.parseInt(parts[parts.length - 1], 10);
+          if (Number.isInteger(pid) && pid > 0) return pid;
+        }
+      }
+      return null;
+    }
     const { stdout } = await execFileAsync("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"]);
     const firstPid = stdout
       .split("\n")

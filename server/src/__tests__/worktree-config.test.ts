@@ -130,10 +130,10 @@ describe("worktree config repair", () => {
     expect(repairedConfig.logging.logDir).toBe(path.join(instanceRoot, "logs"));
     expect(repairedConfig.storage.localDisk.baseDir).toBe(path.join(instanceRoot, "data", "storage"));
     expect(repairedConfig.secrets.localEncrypted.keyFilePath).toBe(path.join(instanceRoot, "secrets", "master.key"));
-    expect(repairedEnv).toContain(`PAPERCLIP_HOME=${JSON.stringify(isolatedHome)}`);
+    expect(repairedEnv).toContain(`PAPERCLIP_HOME="${isolatedHome}"`);
     expect(repairedEnv).toContain('PAPERCLIP_INSTANCE_ID="pap-884-ai-commits-component"');
     expect(repairedEnv).toContain(`PAPERCLIP_CONFIG=${JSON.stringify(await fs.realpath(configPath))}`);
-    expect(repairedEnv).toContain(`PAPERCLIP_CONTEXT=${JSON.stringify(path.join(isolatedHome, "context.json"))}`);
+    expect(repairedEnv).toContain(`PAPERCLIP_CONTEXT="${path.join(isolatedHome, "context.json")}"`);
     expect(repairedEnv).toContain('PAPERCLIP_AGENT_JWT_SECRET="shared-secret"');
     expect(process.env.PAPERCLIP_HOME).toBe(isolatedHome);
     expect(process.env.PAPERCLIP_INSTANCE_ID).toBe("pap-884-ai-commits-component");
@@ -255,8 +255,8 @@ describe("worktree config repair", () => {
     });
     expect(repairedConfig.database.embeddedPostgresDataDir).toBe(path.join(instanceRoot, "db"));
     expect(repairedConfig.secrets.localEncrypted.keyFilePath).toBe(path.join(instanceRoot, "secrets", "master.key"));
-    expect(repairedEnv).toContain(`PAPERCLIP_HOME=${JSON.stringify(isolatedHome)}`);
-    expect(repairedEnv).toContain(`PAPERCLIP_CONFIG=${JSON.stringify(configPath)}`);
+    expect(repairedEnv).toContain(`PAPERCLIP_HOME="${isolatedHome}"`);
+    expect(repairedEnv).toContain(`PAPERCLIP_CONFIG="${configPath}"`);
     expect(repairedEnv).not.toContain("/old/home");
   });
 
@@ -329,10 +329,10 @@ describe("worktree config repair", () => {
       envPath,
       [
         "# Paperclip environment variables",
-        `PAPERCLIP_HOME=${JSON.stringify(isolatedHome)}`,
-        `PAPERCLIP_INSTANCE_ID=${JSON.stringify(instanceId)}`,
-        `PAPERCLIP_CONFIG=${JSON.stringify(configPath)}`,
-        `PAPERCLIP_CONTEXT=${JSON.stringify(path.join(isolatedHome, "context.json"))}`,
+        `PAPERCLIP_HOME="${isolatedHome}"`,
+        `PAPERCLIP_INSTANCE_ID="${instanceId}"`,
+        `PAPERCLIP_CONFIG="${configPath}"`,
+        `PAPERCLIP_CONTEXT="${path.join(isolatedHome, "context.json")}"`,
         'PAPERCLIP_IN_WORKTREE="true"',
         'PAPERCLIP_WORKTREE_NAME="PAP-989-multi-user-implementation-using-plan-from-pap-958"',
         "",
@@ -362,7 +362,7 @@ describe("worktree config repair", () => {
     expect(repairedConfig.secrets.localEncrypted.keyFilePath).toBe(
       path.join(stableInstanceRoot, "secrets", "master.key"),
     );
-    expect(repairedEnv).toContain(`PAPERCLIP_HOME=${JSON.stringify(isolatedHome)}`);
+    expect(repairedEnv).toContain(`PAPERCLIP_HOME="${isolatedHome}"`);
     expect(repairedEnv).not.toContain(`PAPERCLIP_HOME=${JSON.stringify(transientHome)}`);
     expect(process.env.PAPERCLIP_HOME).toBe(isolatedHome);
   });

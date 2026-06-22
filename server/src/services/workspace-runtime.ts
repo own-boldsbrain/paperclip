@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { execSync, spawn, type ChildProcess } from "node:child_process";
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import fs from "node:fs/promises";
 import net from "node:net";
@@ -33,9 +33,22 @@ import { readProjectWorkspaceRuntimeConfig } from "./project-workspace-runtime-c
 export function resolveShell(): string {
   const fallback = process.platform === "win32" ? "sh" : "/bin/sh";
   const shell = process.env.SHELL?.trim();
-  if (!shell) return fallback;
-  if (path.isAbsolute(shell) && !existsSync(shell)) return fallback;
-  return shell;
+  if (shell) {
+    if (path.isAbsolute(shell) && !existsSync(shell)) return fallback;
+    return shell;
+  }
+  if (process.platform === "win32") {
+    try {
+      execSync("where sh", { stdio: "ignore" });
+      return "sh";
+    } catch {
+      const gitShPath = "C:\\Program Files\\Git\\bin\\sh.exe";
+      if (existsSync(gitShPath)) {
+        return gitShPath;
+      }
+    }
+  }
+  return fallback;
 }
 
 export interface ExecutionWorkspaceInput {
@@ -898,7 +911,14 @@ async function validateLinkedGitWorktree(input: {
 
 function terminateChildProcess(child: ChildProcess) {
   if (!child.pid) return;
-  if (process.platform !== "win32") {
+  if (process.platform === "win32") {
+    try {
+      execSync(`C:\\Windows\\System32\\taskkill.exe /pid ${child.pid} /t /f`, { stdio: "ignore" });
+      return;
+    } catch {
+      // Fall through to the direct child kill.
+    }
+  } else {
     try {
       process.kill(-child.pid, "SIGTERM");
       return;

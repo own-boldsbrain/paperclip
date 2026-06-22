@@ -1132,7 +1132,7 @@ describe("realizeExecutionWorkspace", () => {
     // Keep this server-side fixture on provision-worktree.sh's config writer path;
     // CLI/database seeding is covered by the CLI worktree tests.
     await fs.symlink(process.execPath, path.join(isolatedBin, "node"));
-    process.env.PATH = `${isolatedBin}${path.delimiter}/usr/bin${path.delimiter}/bin`;
+    process.env.PATH = `${isolatedBin}${path.delimiter}${process.env.PATH ?? ""}`;
 
     await fs.mkdir(sharedConfigDir, { recursive: true });
     await fs.writeFile(
@@ -1514,11 +1514,11 @@ describe("realizeExecutionWorkspace", () => {
 
       let caught: Error | null = null;
       try {
-        await execFileAsync(scriptPath, [], {
+        await execFileAsync(resolveShell(), [scriptPath], {
           cwd: worktreeRoot,
           env: {
             ...process.env,
-            PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
+            PATH: `${fakeBin}${path.delimiter}${process.env.PATH ?? ""}`,
             PAPERCLIP_WORKSPACE_BASE_CWD: baseRoot,
             PAPERCLIP_WORKSPACE_CWD: worktreeRoot,
           },
@@ -1591,11 +1591,11 @@ describe("realizeExecutionWorkspace", () => {
       );
       await fs.chmod(fakePnpmPath, 0o755);
 
-      const result = await execFileAsync(scriptPath, [], {
+      const result = await execFileAsync(resolveShell(), [scriptPath], {
         cwd: worktreeRoot,
         env: {
           ...process.env,
-          PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
+          PATH: `${fakeBin}${path.delimiter}${process.env.PATH ?? ""}`,
           PAPERCLIP_WORKSPACE_BASE_CWD: baseRoot,
           PAPERCLIP_WORKSPACE_CWD: worktreeRoot,
         },
@@ -2567,33 +2567,33 @@ describe("ensureRuntimeServicesForRun", () => {
     expect(executionServices[0]?.url).not.toBe(primaryServices[0]?.url);
 
     const primaryResponse = await fetch(primaryServices[0]!.url!);
-    expect(await primaryResponse.text()).toBe(path.join(primaryWorkspaceRoot, ".paperclip", "runtime-services"));
+    expect((await primaryResponse.text()).replace(/\\/g, "/")).toBe(path.join(primaryWorkspaceRoot, ".paperclip", "runtime-services").replace(/\\/g, "/"));
 
     const executionResponse = await fetch(executionServices[0]!.url!);
-    expect(await executionResponse.text()).toBe(path.join(worktreeWorkspaceRoot, ".paperclip", "runtime-services"));
+    expect((await executionResponse.text()).replace(/\\/g, "/")).toBe(path.join(worktreeWorkspaceRoot, ".paperclip", "runtime-services").replace(/\\/g, "/"));
   });
 
   it("does not leak parent Paperclip instance env into runtime service commands", async () => {
     const workspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-runtime-env-"));
     const workspace = buildWorkspace(workspaceRoot);
     const envCapturePath = path.join(workspaceRoot, "captured-env.json");
-    const serviceCommand = [
-      "node -e",
-      JSON.stringify(
-        [
-          "const fs = require('node:fs');",
-          `fs.writeFileSync(${JSON.stringify(envCapturePath)}, JSON.stringify({`,
-          "paperclipConfig: process.env.PAPERCLIP_CONFIG ?? null,",
-          "paperclipHome: process.env.PAPERCLIP_HOME ?? null,",
-          "paperclipInstanceId: process.env.PAPERCLIP_INSTANCE_ID ?? null,",
-          "databaseUrl: process.env.DATABASE_URL ?? null,",
-          "customEnv: process.env.RUNTIME_CUSTOM_ENV ?? null,",
-          "port: process.env.PORT ?? null,",
-          "}));",
-          "require('node:http').createServer((req, res) => res.end('ok')).listen(Number(process.env.PORT), '127.0.0.1');",
-        ].join(" "),
-      ),
-    ].join(" ");
+    const testScriptPath = path.join(workspaceRoot, "test-script.js");
+    await fs.writeFile(
+      testScriptPath,
+      [
+        "const fs = require('node:fs');",
+        `fs.writeFileSync(${JSON.stringify(envCapturePath).replace(/\\/g, "\\\\")}, JSON.stringify({`,
+        "paperclipConfig: process.env.PAPERCLIP_CONFIG ?? null,",
+        "paperclipHome: process.env.PAPERCLIP_HOME ?? null,",
+        "paperclipInstanceId: process.env.PAPERCLIP_INSTANCE_ID ?? null,",
+        "databaseUrl: process.env.DATABASE_URL ?? null,",
+        "customEnv: process.env.RUNTIME_CUSTOM_ENV ?? null,",
+        "port: process.env.PORT ?? null,",
+        "}));",
+        "require('node:http').createServer((req, res) => res.end('ok')).listen(Number(process.env.PORT), '127.0.0.1');",
+      ].join("\n"),
+    );
+    const serviceCommand = `node ${testScriptPath}`;
 
     process.env.PAPERCLIP_CONFIG = "/tmp/base-paperclip-config.json";
     process.env.PAPERCLIP_HOME = "/tmp/base-paperclip-home";
@@ -3064,10 +3064,10 @@ describe("resolveShell (shell fallback)", () => {
     expect(resolveShell()).toBe("/bin/sh");
   });
 
-  it("falls back to sh (bare) on Windows when SHELL is unset", () => {
+  it("falls back to sh (bare) or Git bash on Windows when SHELL is unset", () => {
     delete process.env.SHELL;
     Object.defineProperty(process, "platform", { value: "win32" });
-    expect(resolveShell()).toBe("sh");
+    expect(["sh", "C:\\Program Files\\Git\\bin\\sh.exe"]).toContain(resolveShell());
   });
 
   it("falls back to /bin/sh on darwin when SHELL is unset", () => {
@@ -3085,7 +3085,8 @@ describe("resolveShell (shell fallback)", () => {
   it("treats whitespace-only SHELL as unset and uses platform fallback", () => {
     process.env.SHELL = "   ";
     Object.defineProperty(process, "platform", { value: "win32" });
-    expect(resolveShell()).toBe("sh");
+    const resolved = resolveShell();
+    expect(resolved === "sh" || resolved.endsWith("sh.exe")).toBe(true);
   });
 
   it("falls back when SHELL points to a missing absolute path", () => {

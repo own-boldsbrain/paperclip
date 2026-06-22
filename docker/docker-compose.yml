@@ -1,40 +1,36 @@
 services:
-  db:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: paperclip
-      POSTGRES_PASSWORD: paperclip
-      POSTGRES_DB: paperclip
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
-      interval: 2s
-      timeout: 5s
-      retries: 30
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
   server:
     build:
       context: ..
       dockerfile: Dockerfile
-    ports:
-      - "3100:3100"
+    # Ports removed because Traefik will route traffic internally
+    # ports:
+    #   - "3100:3100"
     environment:
-      DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
+      # Use the shared Postgres database (assuming ysh-postgres-shared is available on ysh-network)
+      DATABASE_URL: postgres://paperclip:paperclip@ysh-postgres-shared:5432/paperclip
       PORT: "3100"
       SERVE_UI: "true"
       PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
       PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
-      PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://localhost:3100}"
+      PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://paperclip.local}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
+      # Integrate with the central LiteLLM AI Gateway
+      OPENAI_BASE_URL: "http://ysh-litellm-gateway:4000"
     volumes:
       - paperclip-data:/paperclip
-    depends_on:
-      db:
-        condition: service_healthy
+    networks:
+      - ysh-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperclip.rule=Host(`paperclip.local`)"
+      - "traefik.http.routers.paperclip.entrypoints=web"
+      - "traefik.http.services.paperclip.loadbalancer.server.port=3100"
 
 volumes:
-  pgdata:
   paperclip-data:
+
+networks:
+  ysh-network:
+    external: true
+    name: ysh-network

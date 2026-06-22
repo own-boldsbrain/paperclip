@@ -1,4 +1,3 @@
-const { parse } = require('dotenv');
-console.log(parse('A="C:\\\\test\\\\path"').A === 'C:\\\\test\\\\path');
-console.log(parse('A=C:\\test\\path').A === 'C:\\test\\path');
-console.log(JSON.stringify('C:\\test\\path'));
+const dotenv = require('dotenv');
+console.log(dotenv.parse('A="C:\\\\test"').A);
+console.log(dotenv.parse('B="C:\\test"').B);

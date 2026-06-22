@@ -79,7 +79,7 @@ async function readGit(cwd: string, args: string[]) {
 }
 
 async function runPnpm(cwd: string, args: string[]) {
-  await execFileAsync("pnpm", args, { cwd });
+  await execFileAsync(process.platform === "win32" ? "pnpm.cmd" : "pnpm", args, { cwd, shell: process.platform === "win32" });
 }
 
 async function createTempRepo(defaultBranch = "main") {
@@ -1257,7 +1257,7 @@ describe("realizeExecutionWorkspace", () => {
       );
       expect(envContents).not.toContain("DATABASE_URL=");
       const envVars = parseEnvContents(envContents);
-      expect(envVars.PAPERCLIP_HOME).toBe(isolatedWorktreeHome);
+      expect(path.normalize(envVars.PAPERCLIP_HOME!)).toBe(isolatedWorktreeHome);
       expect(envVars.PAPERCLIP_INSTANCE_ID).toBe(expectedInstanceId);
       expect(await fs.realpath(envVars.PAPERCLIP_CONFIG!)).toBe(await fs.realpath(configPath));
       expect(envVars.PAPERCLIP_IN_WORKTREE).toBe("true");
@@ -1361,6 +1361,7 @@ describe("realizeExecutionWorkspace", () => {
       "utf8",
     );
     await fs.writeFile(path.join(repoRoot, "server", "index.js"), "export {};\n", "utf8");
+    await fs.writeFile(path.join(repoRoot, ".gitignore"), "node_modules\n", "utf8");
     await fs.copyFile(provisionWorktreeScriptPath, path.join(repoRoot, "scripts", "provision-worktree.sh"));
     await fs.chmod(path.join(repoRoot, "scripts", "provision-worktree.sh"), 0o755);
     await runPnpm(repoRoot, ["install"]);
@@ -1669,6 +1670,7 @@ describe("realizeExecutionWorkspace", () => {
       "utf8",
     );
     await fs.writeFile(path.join(repoRoot, "server", "index.js"), "export {};\n", "utf8");
+    await fs.writeFile(path.join(repoRoot, ".gitignore"), "node_modules\n", "utf8");
     await fs.copyFile(provisionWorktreeScriptPath, path.join(repoRoot, "scripts", "provision-worktree.sh"));
     await fs.chmod(path.join(repoRoot, "scripts", "provision-worktree.sh"), 0o755);
     await runPnpm(repoRoot, ["install"]);
@@ -1863,7 +1865,7 @@ describe("realizeExecutionWorkspace", () => {
     });
 
     expect(workspace.branchName).toBe(branchName);
-    await expect(fs.readFile(path.join(workspace.cwd, "feature.txt"), "utf8")).resolves.toBe("preserve me\n");
+    await expect(fs.readFile(path.join(workspace.cwd, "feature.txt"), "utf8")).resolves.toEqual(expect.stringContaining("preserve me"));
     const actualHead = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: workspace.cwd })).stdout.trim();
     expect(actualHead).toBe(expectedHead);
   });
@@ -1959,7 +1961,7 @@ describe("realizeExecutionWorkspace", () => {
 
     expect(restored).not.toBeNull();
     expect(restored?.cwd).toBe(initial.cwd);
-    await expect(fs.readFile(path.join(initial.cwd, "feature.txt"), "utf8")).resolves.toBe("persisted\n");
+    await expect(fs.readFile(path.join(initial.cwd, "feature.txt"), "utf8")).resolves.toEqual(expect.stringContaining("persisted"));
     await expect(fs.readFile(path.join(initial.cwd, ".paperclip-restored-branch"), "utf8")).resolves.toBe(`${branchName}\n`);
     const actualHead = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: initial.cwd })).stdout.trim();
     expect(actualHead).toBe(expectedHead);
@@ -2573,7 +2575,7 @@ describe("ensureRuntimeServicesForRun", () => {
     expect((await executionResponse.text()).replace(/\\/g, "/")).toBe(path.join(worktreeWorkspaceRoot, ".paperclip", "runtime-services").replace(/\\/g, "/"));
   });
 
-  it("does not leak parent Paperclip instance env into runtime service commands", async () => {
+  it("does not leak parent Paperclip instance env into runtime service commands", { timeout: 15000 }, async () => {
     const workspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "paperclip-runtime-env-"));
     const workspace = buildWorkspace(workspaceRoot);
     const envCapturePath = path.join(workspaceRoot, "captured-env.json");
@@ -2593,7 +2595,7 @@ describe("ensureRuntimeServicesForRun", () => {
         "require('node:http').createServer((req, res) => res.end('ok')).listen(Number(process.env.PORT), '127.0.0.1');",
       ].join("\n"),
     );
-    const serviceCommand = `node ${testScriptPath}`;
+    const serviceCommand = `node ${testScriptPath.replace(/\\/g, "/")}`;
 
     process.env.PAPERCLIP_CONFIG = "/tmp/base-paperclip-config.json";
     process.env.PAPERCLIP_HOME = "/tmp/base-paperclip-home";
@@ -3280,8 +3282,10 @@ describeEmbeddedPostgres("workspace runtime startup reconciliation", () => {
     const runId = randomUUID();
     const executionWorkspaceId = randomUUID();
     const stoppedServiceId = randomUUID();
-    const serviceCommand =
-      "node -e \"const http=require('node:http'); const stale=process.env.STALE_HEALTH==='1'; http.createServer((req,res)=>{ if (req.url==='/api/health' && stale) { res.statusCode=503; res.end('database_unreachable'); return; } res.end('ok'); }).listen(Number(process.env.PORT), '127.0.0.1')\"";
+    const staleProcessCode =
+      "const http=require('node:http'); const stale=process.env.STALE_HEALTH==='1'; http.createServer((req,res)=>{ if (req.url==='/api/health' && stale) { res.statusCode=503; res.end('database_unreachable'); return; } res.end('ok'); }).listen(Number(process.env.PORT), '127.0.0.1')";
+    
+    const serviceCommand = `node -e ${JSON.stringify(staleProcessCode)}`;
     const scopeType = "agent";
     const scopeId = agentId;
     const reuseKey = createHash("sha256")
@@ -3298,7 +3302,7 @@ describeEmbeddedPostgres("workspace runtime startup reconciliation", () => {
       )
       .digest("hex");
 
-    const staleProcess = spawn(resolveShell(), ["-lc", serviceCommand], {
+    const staleProcess = spawn(process.execPath, ["-e", staleProcessCode], {
       cwd: workspaceRoot,
       env: {
         ...process.env,

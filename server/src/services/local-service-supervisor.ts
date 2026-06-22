@@ -406,8 +406,9 @@ export async function readLocalServicePortOwner(port: number) {
   try {
     if (process.platform === "win32") {
       const { stdout } = await execFileAsync("netstat", ["-ano", "-p", "TCP"]);
+      const portRegex = new RegExp(`:${port}\\b`);
       for (const line of stdout.split("\n")) {
-        if (line.includes(`:${port}`) && line.includes("LISTEN")) {
+        if (portRegex.test(line) && line.includes("LISTEN")) {
           const parts = line.trim().split(/\s+/);
           const pid = Number.parseInt(parts[parts.length - 1], 10);
           if (Number.isInteger(pid) && pid > 0) return pid;

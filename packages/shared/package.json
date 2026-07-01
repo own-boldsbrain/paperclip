@@ -40,9 +40,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm -s exec tsc",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "pnpm -s exec tsc --noEmit"
   },
   "dependencies": {
     "zod": "^3.25.76"

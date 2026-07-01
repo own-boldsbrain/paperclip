@@ -35,9 +35,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm -s exec tsc",
     "clean": "rm -rf dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "pnpm -s exec tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.20.0",

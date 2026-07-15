@@ -39,13 +39,14 @@ def main():
             results["details"].append({"file": filename, "status": "skipped", "reason": "Already exists"})
             continue
             
-        # Build command: python translate_doc.py -f input.md -o output.md --validate
+        # Build command: python translate_doc.py -f input.md -o output.md --validate -e deeplx
         cmd = [
             "python", 
             translate_script, 
             "-f", md_file, 
             "-o", out_file,
-            "--validate"
+            "--validate",
+            "-e", "deeplx"
         ]
         
         try:

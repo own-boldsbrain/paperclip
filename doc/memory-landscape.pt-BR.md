@@ -18,6 +18,7 @@ O Paperclip não está tentando se tornar um motor de memória opinativo único.
 A pergunta não é "qual projeto de memória vence?" A pergunta é "qual é o contrato mais pequeno do Paperclip que pode ficar acima de vários sistemas de memória muito diferentes sem suprimir as diferenças úteis?".
 
 ## Agrupamento Rápido
+
 ### APIs de memória hospedadas
 
 - `mem0`
@@ -59,6 +60,7 @@ Estes enfatizam persistência local, inspeabilidade e baixa sobrecarga operacion
 | [OpenViking](https://github.com/volcengine/OpenViking) | banco de contexto | organização em estilo de sistema de arquivos das memórias/recursos/habilidades, carregamento em camadas, trajetória de recuperação visualizada | forte fonte para UX de navegação/inspect e provenance de contexto | trata o "banco de contexto" como um produto maior do que o Paperclip deve possuir |
 
 ## Primitivas Comuns No Paisagem
+
 Mesmo que os sistemas discordem sobre a arquitetura, eles convergem em algumas primitivas:
 
 - `ingest`: adicionar memória de texto, mensagens, documentos ou transcrições.
@@ -71,30 +73,39 @@ Mesmo que os sistemas discordem sobre a arquitetura, eles convergem em algumas p
 Se o Paperclip não expor isso, ele não se adaptará bem aos sistemas acima.
 
 ## Onde Os Sistemas Divergem
+
 São essas as diferenças que fazem com que o Paperclip precise de um contrato em camadas em vez de um motor único e rígido.
 
 ### 1. Quem é responsável pela extração?
+
 - `mem0`, `supermemory` e `Memori` esperam que o provedor infira memórias das conversas.
 - O `AWS Bedrock AgentCore Memory` suporta extração gerenciada pelo provedor e pipelines de extração autogerenciados onde o host escreve registros de memória de longo prazo, mas com controle.
 - `memsearch` espera que o host decida o que escrever em Markdown, então indexe.
 - `MemOS`, `memU`, `EverMemOS` e `OpenViking` estão em algum lugar entre, frequentemente expondo pipelines mais ricos de construção de memória.
 
 O Paperclip deve suportar:
+
 - extração gerenciada pelo provedor
 - extração gerenciada pelo Paperclip com armazenamento/recuperação gerenciados pelo provedor
+
 ### 2. Qual é a fonte de verdade?
+
 - `memsearch` e `nuggets` tornam a fonte inspecionável no disco.
 - APIs hospedadas frequentemente fazem o provedor armazenar a versão canônica.
 - Sistemas em estilo de sistema de arquivos como `OpenViking` e `memU` tratam a própria hierarquia como parte do modelo de memória.
 
 O Paperclip não deve exigir uma forma de armazenamento única. Deve exigir referências normalizadas de volta para as entidades do Paperclip.
+
 ### 3. A memória é apenas pesquisa, ou também perfil e planejamento?
+
 - `mem0` e `memsearch` são centrados na pesquisa e CRUD.
 - `supermemory` adiciona perfis como uma saída primeira classe.
 - `MemOS`, `memU`, `EverMemOS` e `OpenViking` expandem para memória de tarefa, perfis, organização em estilo de sistema de arquivos, ingestão assíncrona ou gerenciamento de habilidades/recursos.
 
 O Paperclip deve tornar a pesquisa simples o contrato mínimo e capacidades mais ricas opcionais.
+
 ### 4. A memória é síncrona ou assíncrona?
+
 - ferramentas locais frequentemente funcionam de forma síncrona no processo.
 - `AWS Bedrock AgentCore Memory` é síncrono na borda da API, mas seu caminho de memória de longo prazo inclui comportamento de extração/indexação em segundo plano e políticas de retenção gerenciadas pelo provedor.
 - sistemas maiores adicionam agendadores, indexação assíncrona, compactação ou trabalhos de sincronização.
@@ -102,7 +113,9 @@ O Paperclip deve tornar a pesquisa simples o contrato mínimo e capacidades mais
 O Paperclip precisa de operações de solicitação/resposta diretas e anexos de manutenção em segundo plano.
 
 ## Implicações Específicas Para O Paperclip
-### O Paperclip deve possuir essas preocupações:
+
+### O Paperclip deve possuir essas preocupações
+
 - vincular um provedor a uma empresa e, opcionalmente, anular no agente
 - mapear entidades do Paperclip para escopos do provedor
 - rastreabilidade de volta às issues, comentários, documentos e execuções do Paperclip
@@ -110,7 +123,8 @@ O Paperclip precisa de operações de solicitação/resposta diretas e anexos de
 - superfícies de navegação e inspeção na UI do Paperclip
 - governança em operações destrutivas
 
-### Os provedores devem possuir essas preocupações:
+### Os provedores devem possuir essas preocupações
+
 - heurísticas de extração
 - estratégia de indexação/incorporação
 - classificação e reclassificação
@@ -119,12 +133,15 @@ O Paperclip precisa de operações de solicitação/resposta diretas e anexos de
 - detalhes do motor de armazenamento
 
 ### A superfície de controle deve permanecer pequena
+
 O Paperclip não precisa padronizar todos os recursos de cada provedor. Ele precisa:
+
 - um núcleo portátil essencial
 - flags de capacidade opcionais para provedores mais ricos
 - uma maneira de registrar IDs e metadados do provedor sem fingir que todos os provedores são internamente equivalentes
 
 ## Direção Recomendada
+
 O Paperclip deve adotar um modelo de memória em duas camadas:
 
 1. `Camada de vinculação de provedor + controle`
@@ -134,6 +151,7 @@ O Paperclip deve adotar um modelo de memória em duas camadas:
    Um adaptador embutido ou fornecido por plugin transforma as solicitações de memória do Paperclip em chamadas específicas do provedor.
 
 O núcleo portátil deve cobrir:
+
 - ingestão/gravação
 - pesquisa/recuperação
 - navegação/inspeção
@@ -142,6 +160,7 @@ O núcleo portátil deve cobrir:
 - relatórios de uso
 
 As capacidades opcionais podem abranger:
+
 - síntese de perfil
 - ingestão assíncrona
 - conteúdo multimodal
@@ -149,6 +168,7 @@ As capacidades opcionais podem abranger:
 - navegação e inspeção nativa do provedor
 
 Isso é suficiente para suportar:
+
 - uma baseline local em Markdown semelhante ao `memsearch`
 - serviços hospedados semelhantes a `mem0`, `supermemory` ou `Memori`
 - sistemas de memória mais ricos, como `MemOS` ou `OpenViking`

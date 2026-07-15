@@ -6,7 +6,7 @@ Data: 2026-02-23
 ## 1. Propósito
 
 O Paperclip suporta dois modos de tempo de execução:
- 
+
 1. `local_trusted`
 2. `authenticated`
 
@@ -73,12 +73,14 @@ Comportamento do prompt do servidor:
 
 1. `server.bind=loopback` assume automaticamente o valor padrão para o modo `local_trusted/private`
 2. A configuração avançada do servidor pergunta primeiro sobre a acessibilidade:
-  - `Trusted local` ? 'bind=loopback', `local_trusted/private`
-  - `Private network` ? 'bind=lan', `authenticated/private`
-  - `Tailnet` ? 'bind=tailnet', `authenticated/private`
-  - `Custom` ? modo manual/exposição/entrada de host
-3. A entrada de host bruta é necessária apenas para o caminho `Custom`
-4. A URL pública explícita é necessária apenas para `authenticated + public`
+
+- `Trusted local` ? 'bind=loopback', `local_trusted/private`
+- `Private network` ? 'bind=lan', `authenticated/private`
+- `Tailnet` ? 'bind=tailnet', `authenticated/private`
+- `Custom` ? modo manual/exposição/entrada de host
+
+1. A entrada de host bruta é necessária apenas para o caminho `Custom`
+2. A URL pública explícita é necessária apenas para `authenticated + public`
 
 Exemplos:
 

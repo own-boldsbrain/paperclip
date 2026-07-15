@@ -36,6 +36,7 @@ Observação de segurança/controle:
   - `POST /api/companies/{companyId}/openclaw/invite-prompt`
   - usuários da board com permissão de convite podem chamá-lo
   - agentes chamadores são limitados ao CEO da empresa
+
 1. Aprovando o pedido de adesão na interface do Paperclip, confirme que o agente OpenClaw aparece nos agentes CLA.
 
 2. Pré-visto do gateway (requerido antes dos testes de tarefa).

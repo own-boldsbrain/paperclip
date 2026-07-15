@@ -394,14 +394,14 @@ Recommended build order, highest value first:
 
 ### Medium Value
 
-7. **Transition timestamps** -- `startedAt`, `completedAt`, `cancelledAt` on
+1. **Transition timestamps** -- `startedAt`, `completedAt`, `cancelledAt` on
    issues, auto-set by workflow state changes. Enables velocity tracking and SLA
    measurement.
 
 ### Lower Priority (For Later)
 
-8. **Milestones** -- Useful once projects get complex enough to need stages.
-9. **Initiatives** -- Useful once we have multiple projects that serve a common
+1. **Milestones** -- Useful once projects get complex enough to need stages.
+2. **Initiatives** -- Useful once we have multiple projects that serve a common
    strategic goal.
-10. **Estimates** -- Useful once we want to measure throughput and predict
+3. **Estimates** -- Useful once we want to measure throughput and predict
     capacity.

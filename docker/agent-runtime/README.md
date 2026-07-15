@@ -15,6 +15,7 @@ Container images for running coding-agent harnesses in sandboxed environments (f
 ## Base Image Contents
 
 **OS & Runtime:**
+
 - Ubuntu 22.04
 - Node.js 22 (via NodeSource APT repo)
 - git
@@ -22,9 +23,11 @@ Container images for running coding-agent harnesses in sandboxed environments (f
 - Non-root user `paperclip` (uid/gid 1000)
 
 **Paperclip Binaries:**
+
 - `/usr/local/bin/paperclip-agent-shim`: Go binary compiled from `tools/agent-shim/`. Reads `/run/paperclip/runtime-command.json` and `syscall.Exec`s the harness CLI.
 
 **Defaults:**
+
 - `USER`: 1000:1000 (paperclip, non-root)
 - `WORKDIR`: `/workspace` (mount workspace volumes here)
 - `ENTRYPOINT`: `/usr/bin/tini --` (PID-1 reaper, forwards signals)
@@ -64,6 +67,7 @@ The main agent process runs as the shim (PID 1 under tini). The shim:
 4. SIGTERM from the kubelet propagates directly to the harness (no zombie processes)
 
 **runtime-command.json Contract:**
+
 ```json
 {
   "command": "claude-code",

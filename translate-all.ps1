@@ -66,8 +66,8 @@ foreach ($file in $mdFiles) {
     }
 }
 
-Write-Host "Inventário completo. Encontrados $($mdFiles.Count) arquivos totais."
-Write-Host "Arquivos elegíveis para tradução: $($eligibleFiles.Count)"
+Write-Output "Inventário completo. Encontrados $($mdFiles.Count) arquivos totais."
+Write-Output "Arquivos elegíveis para tradução: $($eligibleFiles.Count)"
 
 if ($DryRun) {
     $eligibleFiles | Format-Table SourcePath, SizeKb
@@ -75,8 +75,8 @@ if ($DryRun) {
 }
 
 if ($eligibleFiles.Count -eq 0) {
-    Write-Host "Nenhum arquivo para traduzir. Gerando COMPLETED.json."
-    @{ status="completed"; timestamp=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json | Out-File $completedPath
+    Write-Output "Nenhum arquivo para traduzir. Gerando COMPLETED.json."
+    @{ status="completed"; timestamp=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json | Out-File $completedPath -Encoding utf8
     exit
 }
 
@@ -93,7 +93,7 @@ $eligibleFiles | ForEach-Object {
     $selectedProvider = $ProviderChoice
     $model = "DeepLX"
     if ($selectedProvider -eq "Auto") {
-        if ($item.SizeKb -le 12) {
+        if ($item.SizeKb -le 1.4) {
             $selectedProvider = "DeepLX"
         } else {
             $selectedProvider = "Ollama"
@@ -124,9 +124,9 @@ $eligibleFiles | ForEach-Object {
                 $success = $true
             }
         } catch {
-            Write-Host "Falha ao processar $($item.SourcePath) na tentativa $attempt com $selectedProvider. $($_.Exception.Message)"
+            Write-Output "Falha ao processar $($item.SourcePath) na tentativa $attempt com $selectedProvider. $($_.Exception.Message)"
             if ($selectedProvider -eq "DeepLX" -and $attempt -eq 2) {
-                Write-Host "Fazendo fallback para Ollama..."
+                Write-Output "Fazendo fallback para Ollama..."
                 $selectedProvider = "Ollama"
                 $model = "translategemma:4b"
             }
@@ -152,7 +152,7 @@ $eligibleFiles | ForEach-Object {
         }
         $jsonLine = $logEntry | ConvertTo-Json -Compress
         Add-Content -Path $manifestPath -Value $jsonLine -Encoding utf8
-        Write-Host "[$selectedProvider] Concluído: $($item.SourcePath)"
+        Write-Output "[$selectedProvider] Concluído: $($item.SourcePath)"
     } else {
         if (Test-Path $tmpPath) { Remove-Item $tmpPath -Force }
         $logEntry = @{
@@ -161,21 +161,22 @@ $eligibleFiles | ForEach-Object {
         }
         $jsonLine = $logEntry | ConvertTo-Json -Compress
         Add-Content -Path $manifestPath -Value $jsonLine -Encoding utf8
-        Write-Host "FALHA: $($item.SourcePath)"
+        Write-Output "FALHA: $($item.SourcePath)"
     }
 }
 
-$finalManifest = Get-Content $manifestPath | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} }
-$failed = $finalManifest | Where-Object { $_.status -eq "failed" }
-
-if ($failed) {
-    $failed | ConvertTo-Json | Out-File $failedPath -Encoding utf8
+$finalManifest = Get-Content $manifestPath -ErrorAction SilentlyContinue | ForEach-Object { try { $_ | ConvertFrom-Json } catch {} }
+if ($finalManifest) {
+    $failed = $finalManifest | Where-Object { $_.status -eq "failed" }
+    if ($failed) {
+        $failed | ConvertTo-Json | Out-File $failedPath -Encoding utf8
+    }
 }
 
 $tmpFiles = Get-ChildItem -Path $Root -Recurse -Filter "*.tmp"
 if ($tmpFiles.Count -eq 0) {
     @{ status="completed"; timestamp=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json | Out-File $completedPath -Encoding utf8
-    Write-Host "Processo concluído com sucesso. COMPLETED.json gerado."
+    Write-Output "Processo concluído com sucesso. COMPLETED.json gerado."
 } else {
-    Write-Host "Aviso: Arquivos .tmp restantes foram encontrados."
+    Write-Output "Aviso: Arquivos .tmp restantes foram encontrados."
 }

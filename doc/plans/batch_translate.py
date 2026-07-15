@@ -9,10 +9,10 @@ def main():
     target_dir = r"C:\Users\fjuni\OneDrive\Documentos\GitHub\paperclip\doc\plans"
     translate_script = r"C:\Users\fjuni\.gemini\config\skills\translation\scripts\translate_doc.py"
     
-    # Get all .md files that don't end with .pt-br.md
+    # Get all .md files that don't end with .pt-BR.md
     md_files = []
     for file_path in glob.glob(os.path.join(target_dir, "*.md")):
-        if not file_path.endswith(".pt-br.md"):
+        if not file_path.endswith(".pt-BR.md"):
             md_files.append(file_path)
             
     print(f"Found {len(md_files)} Markdown files to process.")
@@ -29,7 +29,7 @@ def main():
     
     for i, md_file in enumerate(md_files, 1):
         filename = os.path.basename(md_file)
-        out_file = md_file[:-3] + ".pt-br.md"
+        out_file = md_file[:-3] + ".pt-BR.md"
         
         print(f"[{i}/{len(md_files)}] Processing {filename}...")
         

@@ -4,3 +4,9 @@
 {"status":"failed","source":"doc/CLI.md"}
 {"status":"failed","source":"doc/CLIPHUB.md"}
 {"status":"failed","source":"doc/DATABASE.md"}
+{"source":"doc/DEPLOYMENT-MODES.md","started_at":"2026-07-15T01:25:04-03:00","provider":"Ollama","output":"doc/DEPLOYMENT-MODES.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:27:27-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"C81C37B9CBFDEC7B551E647C1E73377273147BC8E0ADA6F9FA05CC764BED27C0"}
+{"status":"failed","source":"doc/DEVELOPING.md"}
+{"status":"failed","source":"doc/DOCKER.md"}
+{"status":"failed","source":"doc/execution-semantics.md"}
+{"status":"failed","source":"doc/GOAL.md"}
+{"source":"doc/LOW-TRUST-PRESETS.md","started_at":"2026-07-15T01:28:39-03:00","provider":"Ollama","output":"doc/LOW-TRUST-PRESETS.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:29:28-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"0FFADA7D6909AFAA3DA87B0AB4662BBA7897B422D78653218C1AF7C6EE402784"}

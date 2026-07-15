@@ -46,7 +46,9 @@ def main():
             "-f", md_file, 
             "-o", out_file,
             "--validate",
-            "-e", "deeplx"
+            "-e", "deeplx",
+            "-w", "1",
+            "--stream-log"
         ]
         
         try:

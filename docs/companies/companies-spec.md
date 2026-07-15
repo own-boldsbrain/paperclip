@@ -585,6 +585,7 @@ Optional:
 ```text
 .paperclip.yaml
 ```
+
 ```
 
 **Recommendation**

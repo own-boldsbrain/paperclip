@@ -97,10 +97,10 @@ $eligibleFiles | ForEach-Object {
             $selectedProvider = "DeepLX"
         } else {
             $selectedProvider = "Ollama"
-            $model = "translategemma:4b"
+            $model = "translategemma:latest"
         }
     } elseif ($selectedProvider -eq "Ollama") {
-        $model = "translategemma:4b"
+        $model = "translategemma:latest"
     }
 
     $tmpPath = $item.TargetPath + ".tmp"
@@ -128,7 +128,7 @@ $eligibleFiles | ForEach-Object {
             if ($selectedProvider -eq "DeepLX" -and $attempt -eq 2) {
                 Write-Output "Fazendo fallback para Ollama..."
                 $selectedProvider = "Ollama"
-                $model = "translategemma:4b"
+                $model = "translategemma:latest"
             }
             $attempt++
             Start-Sleep -Seconds (2 * $attempt)

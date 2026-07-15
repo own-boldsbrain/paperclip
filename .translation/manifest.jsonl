@@ -1,0 +1,6 @@
+﻿{"status":"failed","source":"doc/AGENT-ARTIFACTS.md"}
+{"source":"doc/AGENT-ARTIFACTS.md","started_at":"2026-07-15T01:21:37-03:00","provider":"Ollama","output":"doc/AGENT-ARTIFACTS.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:23:52-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"032048C31CCADF9E3AFD0FBDD8ED8545601720B9AA22470BB6CEC1F4B994909C"}
+{"status":"failed","source":"doc/AGENTCOMPANIES_SPEC_INVENTORY.md"}
+{"status":"failed","source":"doc/CLI.md"}
+{"status":"failed","source":"doc/CLIPHUB.md"}
+{"status":"failed","source":"doc/DATABASE.md"}

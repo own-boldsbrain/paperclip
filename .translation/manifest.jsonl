@@ -10,3 +10,9 @@
 {"status":"failed","source":"doc/execution-semantics.md"}
 {"status":"failed","source":"doc/GOAL.md"}
 {"source":"doc/LOW-TRUST-PRESETS.md","started_at":"2026-07-15T01:28:39-03:00","provider":"Ollama","output":"doc/LOW-TRUST-PRESETS.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:29:28-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"0FFADA7D6909AFAA3DA87B0AB4662BBA7897B422D78653218C1AF7C6EE402784"}
+{"source":"doc/memory-landscape.md","started_at":"2026-07-15T01:29:28-03:00","provider":"Ollama","output":"doc/memory-landscape.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:33:29-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"6563A7D94B163C36E52CC7844653EF51AC2EE9F2E900B95CCDAF1C4326951E9E"}
+{"status":"failed","source":"doc/observability.md"}
+{"source":"doc/OPENCLAW_ONBOARDING.md","started_at":"2026-07-15T01:33:47-03:00","provider":"Ollama","output":"doc/OPENCLAW_ONBOARDING.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:36:08-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"31D6E9C33215C003B737CA9E8571919274D452B82B8D9EC86A46CFF626FDEB70"}
+{"status":"failed","source":"doc/PRODUCT.md"}
+{"source":"doc/PUBLISHING.md","started_at":"2026-07-15T01:36:27-03:00","provider":"Ollama","output":"doc/PUBLISHING.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:41:00-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"1290B613EBA5597DB38A5CF7885AD1D7051E7603D9E0FE08941AA0946F32E1C0"}
+{"source":"doc/README-draft.md","started_at":"2026-07-15T01:41:01-03:00","provider":"Ollama","output":"doc/README-draft.pt-BR.md","status":"completed","finished_at":"2026-07-15T01:42:06-03:00","model":"translategemma:latest","attempts":1,"source_sha256":"52339CC3DDDB1D76F27665723F47DBCB34F4980317169CF88F20FE919090F52F"}
